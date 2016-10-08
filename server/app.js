@@ -11,6 +11,9 @@ var router = require('./routes.js');
 var app = express();
 module.exports.app = app;
 
+//dont need to uuse cors to allow cross-origin requests?
+// var cors = require('cors');
+// app.use(cors());
 // Set what we are listening on.
 app.set('port', 3000);
 
@@ -29,4 +32,3 @@ if (!module.parent) {
   app.listen(app.get('port'));
   console.log('Listening on', app.get('port'));
 }
-
