@@ -1,8 +1,7 @@
 var db = require('../db');
-// var Promise = require('bluebird');
+var Promise = require('bluebird');
 
 var messageId = 0;
-var userId = 6;
 var roomId = 0;
 var createdAt = 'asd';
 var text = 'test';
@@ -48,30 +47,70 @@ module.exports = {
 
   users: {
     // Ditto as above.
-    get: function (username, cb) {
-      dbConnection = db.initialize;
-      var exist = false;
-      dbConnection.query('select name from users where name ="' + username + '"', function(err, data) {
-        if (err) { return err; }
-        exist = data.length !== 0;
-        cb(exist);
+    get: function (username) {
+      return new Promise((resolve, reject) => {
+        db.initialize.then(function(conn) {
+          conn.query('select name from users where name ="' + username + '"', function(err, data) {
+            if (err) { 
+              reject(err); 
+            } else {
+              resolve(data.length !== 0);
+            }
+          });
+        });
       });
     },
     post: function (username) {
-      dbConnection = db.initialize;
-      module.exports.users.get(username, function (exist) {
+      var dbConnection;
+      return module.exports.users.get(username).then(function(exist) {
         if (exist) {
+          throw new Error('did not work');
+          //if there is a user, we hopefully won't run the promises below these
         } else {
-          dbConnection.query('insert into users values (' + userId + ', "' + username + '")', function(err, data) {
-            if (err) {
-              console.log('we have an error', err);
-            } else {
-              console.log('we have data', data);
-              userId++;
-            }
-          });
+          return db.initialize;
         }
+      }).then(function(conn) {    
+        dbConnection = conn;
+        return dbConnection.query('select name from users');
+      }).then(function(names) {
+        return names.length;
+      }).then(function(userId) {
+        return dbConnection.query('insert into users values (' + userId + ', "' + username + '")');
+      }).then(function(successobj) {
+        console.log('we succeeded');
+        return successobj;
+      }).catch(function(err) {
+        console.log('we found an err');
+        return err;
       });
+
+      //promises have worked 
+
+
+      //     , module.exports.users.get(username)).then(function(conn, exist) {
+      //   var dbConnection = conn;
+      //   console.log(conn);
+      //   if (exist) {
+      //   } else {
+      //     return dbConnection.query('select name from users');
+      //   }
+      // .then(function(names) {
+      //   return names.length;
+      // }).then(function(userId) {
+      //   return dbConnection.query('insert into users values (' + userId + ', "' + username + '")');
+      // }).then(function(successobj) {
+      //   console.log('we succeeded');
+      //   return successobj;
+      // });
+            // dbConnection.query('insert into users values (' + userId + ', "' + username + '")', function(err, data) {
+            //   if (err) {
+            //     console.log('we have an error', err);
+            //   } else {
+            //     console.log('we have data', data);
+            //     cb();
+            //   }
+            // });
+
     },
   },
 
