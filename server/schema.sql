@@ -29,10 +29,10 @@ CREATE TABLE messages (
   foreign key (user_id) references users(id) on delete cascade on update cascade,
   foreign key (room_id) references rooms(id) on delete cascade on update cascade
 );
-/*insert into users (name) values ('name');
-insert into rooms (name) values ('yolo');
-insert into messages (id, text, user_id, room_id) values (1, '123', 1, 1);
-*/
+-- insert into users (name) values ('name');
+-- insert into rooms (name) values ('yolo');
+-- insert into messages (id, text, user_id, room_id) values ('123', 1, 1);
+
 /*  Execute this file from the command line by typing:
  *    mysql -u root -p < server/schema.sql
  *  to create the database and the tables.*/

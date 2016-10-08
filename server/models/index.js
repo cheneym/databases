@@ -15,14 +15,9 @@ module.exports = {
           + 'm.createdAt from messages m inner join users u on m.user_id = u.id '
           + 'inner join rooms r on m.room_id = r.id order by m.id asc');
       });
-         // run get on all userIds (to fill in with username)
-         // run get on all roomIds (to fill in with roomname)
-      // 
-      // 
     }, 
     
     post: function (message) {
-
       var usernamePromise = module.exports.users.getOne(message.username)
         .then(function(userNameAndId) {
           if (userNameAndId) {
@@ -47,20 +42,13 @@ module.exports = {
           }
         });
 
-      Promise.join(usernamePromise, roomnamePromise, db.initialize, function(userObj, roomObj, conn) {
+      return Promise.join(usernamePromise, roomnamePromise, db.initialize, function(userObj, roomObj, conn) {
         return conn.query('insert into messages (text, user_id, room_id) values (?, ?, ?)', [message.text, userObj.id, roomObj.id]);
       });
     } // a function which can be used to insert a message into the database
   },
 
   users: {
-    get: function() {
-      return db.initialize.then(function(conn) {
-        return conn.query('select name from users order by id asc');
-      });
-    },
-
-    // Ditto as above.
     getOne: function (username) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
@@ -78,6 +66,13 @@ module.exports = {
         });
       });
     },
+
+    get: function() {
+      return db.initialize.then(function(conn) {
+        return conn.query('select name from users order by id asc');
+      });
+    },
+
     post: function (username) {
       return module.exports.users.getOne(username).then(function(exist) {
         if (exist) {
@@ -99,12 +94,6 @@ module.exports = {
   },
 
   rooms: {
-    get: function() {
-      return db.initialize.then(function(conn) {
-        return conn.query('select name from rooms order by id asc');
-      });
-    },
-
     getOne: function (roomname) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
@@ -122,6 +111,13 @@ module.exports = {
         });
       });
     },
+
+    get: function() {
+      return db.initialize.then(function(conn) {
+        return conn.query('select name from rooms order by id asc');
+      });
+    },
+
     post: function (roomname) {
       return module.exports.rooms.getOne(roomname).then(function(exist) {
         if (exist) {
