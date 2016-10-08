@@ -5,31 +5,33 @@ USE chat;
 
 CREATE TABLE users (
   /* Describe your table here.*/
-  id int(11),
-  name varchar(255),
+  id int(11) NOT NULL,
+  name varchar(255) NOT NULL,
   primary key (id)
 );
 
 /* Create other tables and define schemas for them here! */
 CREATE TABLE rooms (
   /* Describe your table here.*/
-  id int(11),
-  name varchar(255),
+  id int(11) NOT NULL,
+  name varchar(255) NOT NULL,
   primary key (id)
 );
 
 CREATE TABLE messages (
   /* Describe your table here.*/
-  id int(11),
-  text varchar(255),
-  user_id int(11),
-  room_id int(11),
-  createdAt varchar(255),
+  id int(11) NOT NULL,
+  text varchar(255) NOT NULL,
+  user_id int(11) NOT NULL,
+  room_id int(11) NOT NULL,
+  createdAt varchar(255) NOT NULL,
   primary key (id),
-  foreign key (user_id) references users(id) on delete cascade,
-  foreign key (room_id) references rooms(id) on delete cascade
+  foreign key (user_id) references users(id) on delete cascade on update cascade,
+  foreign key (room_id) references rooms(id) on delete cascade on update cascade
 );
-
+insert into users values (1, 'name');
+insert into rooms values (1, 'yolo');
+insert into messages values (1, '123', 1, 1, '123');
 
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql

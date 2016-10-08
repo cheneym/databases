@@ -14,6 +14,7 @@ describe('Persistent Node Chat Server', function() {
       password: 'yes',
       database: 'chat'
     });
+    // we may want to delete this
     dbConnection.connect();
 
     var tablename = 'messages'; // TODO: fill this out
@@ -24,6 +25,7 @@ describe('Persistent Node Chat Server', function() {
   });
 
   afterEach(function() {
+    // we may want to delete this
     dbConnection.end();
   });
 

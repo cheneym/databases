@@ -11,20 +11,28 @@ module.exports = {
       console.log(req.url);
       req.on('data', function(data) {
         var result = JSON.parse(data.toString());
-        console.log(result);
-        models.post(result);
+        //console.log(result);
+        // models.messages.post(result);
+        console.log(result.username);
+        models.users.post(result.username);
+        // models.users.get('helloworld');
       });
 
-
-      res.writeHead(201);
-      res.end('why?');
+      req.on('end', function(err, data) {
+        res.writeHead(201);
+        res.end('why?');
+      });
     } // a function which handles posting a message to the database
   },
 
   users: {
     // Ditto as above
-    get: function (req, res) {},
-    post: function (req, res) {}
+    get: function (req, res) {
+
+    },
+    post: function (req, res) {
+
+    }
   }
 };
 
