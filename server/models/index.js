@@ -50,7 +50,7 @@ module.exports = {
     get: function (username) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
-          conn.query('select name from users where name ="' + username + '"', function(err, data) {
+          conn.query('select name from users where name =?', [username], function(err, data) {
             if (err) { 
               reject(err); 
             } else {
@@ -61,7 +61,6 @@ module.exports = {
       });
     },
     post: function (username) {
-      var dbConnection;
       return module.exports.users.get(username).then(function(exist) {
         if (exist) {
           throw new Error('did not work');
@@ -70,12 +69,7 @@ module.exports = {
           return db.initialize;
         }
       }).then(function(conn) {    
-        dbConnection = conn;
-        return dbConnection.query('select name from users');
-      }).then(function(names) {
-        return names.length;
-      }).then(function(userId) {
-        return dbConnection.query('insert into users values (' + userId + ', "' + username + '")');
+        return conn.query('insert into users (name) values (?)', [username]);
       }).then(function(successobj) {
         console.log('we succeeded');
         return successobj;
@@ -83,43 +77,40 @@ module.exports = {
         console.log('we found an err');
         return err;
       });
-
-      //promises have worked 
-
-
-      //     , module.exports.users.get(username)).then(function(conn, exist) {
-      //   var dbConnection = conn;
-      //   console.log(conn);
-      //   if (exist) {
-      //   } else {
-      //     return dbConnection.query('select name from users');
-      //   }
-      // .then(function(names) {
-      //   return names.length;
-      // }).then(function(userId) {
-      //   return dbConnection.query('insert into users values (' + userId + ', "' + username + '")');
-      // }).then(function(successobj) {
-      //   console.log('we succeeded');
-      //   return successobj;
-      // });
-            // dbConnection.query('insert into users values (' + userId + ', "' + username + '")', function(err, data) {
-            //   if (err) {
-            //     console.log('we have an error', err);
-            //   } else {
-            //     console.log('we have data', data);
-            //     cb();
-            //   }
-            // });
-
     },
   },
 
   rooms: {
-    get: function() {
-
+    get: function (roomname) {
+      return new Promise((resolve, reject) => {
+        db.initialize.then(function(conn) {
+          conn.query('select name from rooms where name =?', [roomname], function(err, data) {
+            if (err) { 
+              reject(err); 
+            } else {
+              resolve(data.length !== 0);
+            }
+          });
+        });
+      });
     },
-    post: function() {
-
+    post: function (roomname) {
+      return module.exports.rooms.get(roomname).then(function(exist) {
+        if (exist) {
+          throw new Error('did not work');
+          //if there is a user, we hopefully won't run the promises below these
+        } else {
+          return db.initialize;
+        }
+      }).then(function(conn) {    
+        return conn.query('insert into rooms (name) values (?)', [roomname]);
+      }).then(function(successobj) {
+        console.log('we succeeded');
+        return successobj;
+      }).catch(function(err) {
+        console.log('we found an err');
+        return err;
+      });
     }
   }
 };

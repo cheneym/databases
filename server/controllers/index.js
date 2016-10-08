@@ -13,8 +13,8 @@ module.exports = {
         var result = JSON.parse(data.toString());
         //console.log(result);
         // models.messages.post(result);
-        console.log(result.username);
-        models.users.post(result.username);
+        console.log(result.roomname);
+        models.rooms.post(result.roomname);
         // models.users.get('helloworld');
       });
 
