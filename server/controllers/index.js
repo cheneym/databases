@@ -6,7 +6,6 @@ module.exports = {
         // run get on all userIds (to fill in with username)
         // run get on all roomIds (to fill in with roomname)
       models.messages.get().then(function(data) {
-        console.log(data);
         res.writeHead(200, {'Content-Type': 'application/json'}); 
         res.end(JSON.stringify({results: data}));
       });
@@ -38,7 +37,11 @@ module.exports = {
   users: {
     // Ditto as above
     get: function (req, res) {
-
+      models.users.get()
+      .then(function(data) {
+        res.writeHead(200, {'Content-Type': 'application/json'}); 
+        res.end(JSON.stringify({results: data}));
+      });
     },
     post: function (req, res) {
 

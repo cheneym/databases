@@ -23,26 +23,26 @@ module.exports = {
     
     post: function (message) {
 
-      var usernamePromise = module.exports.users.get(message.username)
+      var usernamePromise = module.exports.users.getOne(message.username)
         .then(function(userNameAndId) {
           if (userNameAndId) {
             return userNameAndId;
           } else {
             return module.exports.users.post(message.username)
               .then(function(successobj) {
-                return module.exports.users.get(message.username); 
+                return module.exports.users.getOne(message.username); 
               });
           }
         });
 
-      var roomnamePromise = module.exports.rooms.get(message.roomname)
+      var roomnamePromise = module.exports.rooms.getOne(message.roomname)
         .then(function(roomNameAndId) {
           if (roomNameAndId) {
             return roomNameAndId;
           } else {
             return module.exports.rooms.post(message.roomname)
               .then(function(successobj) {
-                return module.exports.rooms.get(message.roomname); 
+                return module.exports.rooms.getOne(message.roomname); 
               });
           }
         });
@@ -54,8 +54,14 @@ module.exports = {
   },
 
   users: {
+    get: function() {
+      return db.initialize.then(function(conn) {
+        return conn.query('select name from users order by id asc');
+      });
+    },
+
     // Ditto as above.
-    get: function (username) {
+    getOne: function (username) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
           conn.query('select * from users where name =?', [username], function(err, data) {
@@ -73,7 +79,7 @@ module.exports = {
       });
     },
     post: function (username) {
-      return module.exports.users.get(username).then(function(exist) {
+      return module.exports.users.getOne(username).then(function(exist) {
         if (exist) {
           throw new Error('did not work');
           //if there is a user, we hopefully won't run the promises below these
@@ -93,7 +99,13 @@ module.exports = {
   },
 
   rooms: {
-    get: function (roomname) {
+    get: function() {
+      return db.initialize.then(function(conn) {
+        return conn.query('select name from rooms order by id asc');
+      });
+    },
+
+    getOne: function (roomname) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
           conn.query('select * from rooms where name =?', [roomname], function(err, data) {
@@ -111,7 +123,7 @@ module.exports = {
       });
     },
     post: function (roomname) {
-      return module.exports.rooms.get(roomname).then(function(exist) {
+      return module.exports.rooms.getOne(roomname).then(function(exist) {
         if (exist) {
           throw new Error('did not work');
           //if there is a user, we hopefully won't run the promises below these
