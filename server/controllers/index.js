@@ -14,7 +14,8 @@ module.exports = {
         //console.log(result);
         // models.messages.post(result);
         console.log(result.roomname);
-        models.rooms.post(result.roomname);
+        models.messages.post(result);
+        // models.users.post(result.username);
         // models.users.get('helloworld');
       });
 

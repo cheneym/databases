@@ -12,36 +12,36 @@ module.exports = {
     
     post: function (message) {
       // console.log(db);
-      // var userPostPromise = function(user) {
-      //   return new Promise((resolve, reject) => {
-      //     if (error) {
-      //       reject('nooo');
-      //     } else {
-      //       resolve(users.post(result.username));
-      //     }
-      //   );
-      // };
-      // when user post completes, call the rest of everything. 
-      //  
-
-      // userPostPromise(message.username)
       // var dbConnection = db.initialize;
       //separate message into text, username roomname
-      //text    free
-      //user_id ----> use username to find corresponding userId if any (users.get), otherwise
-        //users.post
-      //room_id ----> use roomname to find roomId if any , otherwise
-        //rooms.post
-      //createdAt ----> Create date for current message
-      //messageId free, increment by 1
-
-      //write to db
-      // dbConnection.query(`INSERT INTO messages
-      //   VALUES ($(messageId), $(text), $(userId), $(roomId), $(createdAt)`);
-      // dbConnection.query('select * from messages');
-
-
-      // db.add
+      var text = message.text;
+      var userId;
+      var roomId;
+      var usernamePromise = module.exports.users.get(message.username)
+        .then(function(userId) {
+          if (userId) {
+            return userId;
+          } else {
+            return module.exports.users.post(message.username)
+              .then(function(successobj) {
+                return module.exports.users.get(message.username); 
+              });
+          }
+        });
+      var roomnamePromise = module.exports.rooms.get(message.roomname)
+        .then(function(roomId) {
+          if (roomId) {
+            return roomId;
+          } else {
+            return module.exports.rooms.post(message.roomname)
+              .then(function(successobj) {
+                return module.exports.rooms.get(message.roomname); 
+              });
+          }
+        });
+      Promise.join(usernamePromise, roomnamePromise, db.initialize, function(userId, roomId, conn) {
+        return conn.query('insert into messages (text, user_id, room_id) values (?, ?, ?)', [message.text, userId, roomId]);
+      });
     } // a function which can be used to insert a message into the database
   },
 
@@ -50,11 +50,15 @@ module.exports = {
     get: function (username) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
-          conn.query('select name from users where name =?', [username], function(err, data) {
+          conn.query('select id from users where name =?', [username], function(err, data) {
             if (err) { 
               reject(err); 
             } else {
-              resolve(data.length !== 0);
+              if (data.length > 0) {
+                resolve(data[0].id);
+              } else {
+                resolve(false);
+              }
             }
           });
         });
@@ -84,11 +88,15 @@ module.exports = {
     get: function (roomname) {
       return new Promise((resolve, reject) => {
         db.initialize.then(function(conn) {
-          conn.query('select name from rooms where name =?', [roomname], function(err, data) {
+          conn.query('select id from rooms where name =?', [roomname], function(err, data) {
             if (err) { 
               reject(err); 
             } else {
-              resolve(data.length !== 0);
+              if (data.length > 0) {
+                resolve(data[0].id);
+              } else {
+                resolve(false);
+              }
             }
           });
         });
