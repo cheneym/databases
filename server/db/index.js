@@ -27,7 +27,8 @@ exports.Message = db.define('Message', {
   text: Sequelize.STRING,
 });
 
+exports.User.hasMany(exports.Message);
+exports.Room.hasMany(exports.Message);
 exports.Message.belongsTo(exports.User);
 exports.Message.belongsTo(exports.Room);
-
 // db.sync();
