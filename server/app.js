@@ -10,7 +10,7 @@ var router = require('./routes.js');
 
 var app = express();
 module.exports.app = app;
-
+// db.sync();
 //dont need to uuse cors to allow cross-origin requests?
 // var cors = require('cors');
 // app.use(cors());

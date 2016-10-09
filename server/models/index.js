@@ -10,63 +10,58 @@ module.exports = {
   messages: {
     get: function () {
       // a function which produces all the messages
-      return db.initialize.then(function(conn) {
-        return conn.query('select m.id as objectId, m.text, u.name as username, r.name as roomname, '
-          + 'm.createdAt from messages m inner join users u on m.user_id = u.id '
-          + 'inner join rooms r on m.room_id = r.id order by m.id asc');
+      // return db.initialize.then(function(conn) {
+      //   return conn.query('select m.id as objectId, m.text, u.name as username, r.name as roomname, '
+      //     + 'm.createdAt from messages m inner join users u on m.user_id = u.id '
+      //     + 'inner join rooms r on m.room_id = r.id order by m.id asc');
+      // });
+      return db.Message.findAll({
+        attributes: ['id', 'createdAt', 'text'],
+        include: [ 
+          {
+            model: db.User, 
+            attributes: ['name']
+          },
+          {
+            model: db.Room,
+            attributes: ['name']
+          }]
       });
     }, 
     
     post: function (message) {
-      var usernamePromise = module.exports.users.getOne(message.username)
-        .then(function(userNameAndId) {
-          if (userNameAndId) {
-            return userNameAndId;
-          } else {
-            return module.exports.users.post(message.username)
-              .then(function(successobj) {
-                return module.exports.users.getOne(message.username); 
-              });
-          }
-        });
-
-      var roomnamePromise = module.exports.rooms.getOne(message.roomname)
-        .then(function(roomNameAndId) {
-          if (roomNameAndId) {
-            return roomNameAndId;
-          } else {
-            return module.exports.rooms.post(message.roomname)
-              .then(function(successobj) {
-                return module.exports.rooms.getOne(message.roomname); 
-              });
-          }
-        });
-
-      return Promise.join(usernamePromise, roomnamePromise, db.initialize, function(userObj, roomObj, conn) {
-        return conn.query('insert into messages (text, user_id, room_id) values (?, ?, ?)', [message.text, userObj.id, roomObj.id]);
+      // message.text
+      // message.roomname
+      // message.username
+      var userPromise = db.User.findOrCreate({
+        where: {
+          name: message.username
+        }
       });
-    } // a function which can be used to insert a message into the database
+
+      var roomPromise = db.Room.findOrCreate({
+        where: {
+          name: message.roomname
+        }
+      });
+
+      return Promise.join(userPromise, roomPromise, function(userInstance, roomInstance) {
+        db.Message.create({
+          text: message.text,
+          UserId: userInstance[0].get('id'),
+          RoomId: roomInstance[0].get('id')
+        }).then(function() {
+          console.log('success');
+          return;
+        }).catch(function(err) {
+          console.log('wahh wahhhhh', err);
+          return;
+        });
+      });
+    }
   },
 
   users: {
-    getOne: function (username) {
-      return new Promise((resolve, reject) => {
-        db.initialize.then(function(conn) {
-          conn.query('select * from users where name =?', [username], function(err, data) {
-            if (err) { 
-              reject(err); 
-            } else {
-              if (data.length > 0) {
-                resolve(data[0]);
-              } else {
-                resolve(false);
-              }
-            }
-          });
-        });
-      });
-    },
-
     get: function() {
       return db.initialize.then(function(conn) {
         return conn.query('select name from users order by id asc');
